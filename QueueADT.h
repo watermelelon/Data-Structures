@@ -1,4 +1,5 @@
 #pragma once
+#pragma once
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -13,6 +14,7 @@ typedef struct
 	QUEUE_NODE* front;
 	QUEUE_NODE* rear;
 	int         count;
+	int			sum;
 } QUEUE;
 
 //	Prototype Declarations 
@@ -24,6 +26,7 @@ bool  enqueue(QUEUE* queue, void* itemPtr);
 bool  queueFront(QUEUE* queue, void** itemPtr);
 bool  queueRear(QUEUE* queue, void** itemPtr);
 int   queueCount(QUEUE* queue);
+
 
 bool  emptyQueue(QUEUE* queue);
 bool  fullQueue(QUEUE* queue);
@@ -41,12 +44,14 @@ QUEUE* createQueue(void)
 		queue->front = NULL;
 		queue->rear = NULL;
 		queue->count = 0;
+		queue->sum = 0;
 	} // if 
 	return queue;
 }	// createQueue 
 
 bool enqueue(QUEUE* queue, void* itemPtr)
 {
+
 	//	Local Definitions 
 	QUEUE_NODE* newPtr;
 
@@ -58,16 +63,23 @@ bool enqueue(QUEUE* queue, void* itemPtr)
 	newPtr->dataPtr = itemPtr;
 	newPtr->next = NULL;
 
-	if (queue->count == 0)
+
+	if (queue->count == 0) {
 		// Inserting into null queue 
 		queue->front = newPtr;
-	else
+		
+	}
+	else {
 		queue->rear->next = newPtr;
+	}
+		(queue->count)++;
+		queue->rear = newPtr;
+	
 
-	(queue->count)++;
-	queue->rear = newPtr;
 	return true;
+
 }	// enqueue 
+
 
 bool dequeue(QUEUE* queue, void** itemPtr)
 {
@@ -107,11 +119,11 @@ bool queueRear(QUEUE* queue, void** itemPtr)
 {
 	//	Statements 
 	if (!queue->count)
-		return true;
+		return false;
 	else
 	{
 		*itemPtr = queue->rear->dataPtr;
-		return false;
+		return true;
 	} // else 
 }	// queueRear
 
@@ -164,21 +176,19 @@ QUEUE* destroyQueue(QUEUE* queue)
 }	// destroyQueue 
 
 
-void fillQueues(QUEUE*, QUEUE*, QUEUE*, QUEUE*);
+void fillQueue(QUEUE*);
 void printQueues(QUEUE*, QUEUE*, QUEUE*, QUEUE*);
-
 void printOneQueue(QUEUE* pQueue);
 
-void fillQueues(QUEUE* q0to9, QUEUE* q10to19, QUEUE* q20to29, QUEUE* qOver29)
+void fillQueue(QUEUE* q)
 {
 	//	Local Definitions 
-	int  category;
 	int  item;
 	int* dataPtr;
 
 	//	Statements 
-	printf("Categorizing data:\n");
-	srand(79);
+	printf("Initializing data:\n");
+	srand(49);
 
 	for (int i = 1; i <= 25; i++)
 	{
@@ -187,46 +197,18 @@ void fillQueues(QUEUE* q0to9, QUEUE* q10to19, QUEUE* q20to29, QUEUE* qOver29)
 			exit(100);
 
 		*dataPtr = item = rand() % 51;
-		category = item / 10;
+		enqueue(q, dataPtr);
+		q->sum += item;
+
+		//printf("Item added to queue: ");
 		printf("%3d", item);
 		if (!(i % 11))
 			// Start new line when line full 
 			printf("\n");
-
-		switch (category)
-		{
-		case 0: enqueue(q0to9, dataPtr);
-			break;
-		case 1: enqueue(q10to19, dataPtr);
-			break;
-		case 2: enqueue(q20to29, dataPtr);
-			break;
-		default: enqueue(qOver29, dataPtr);
-			break;
-		} // switch 
 	} // for 
-	printf("\nEnd of data categorization\n\n");
+	//printf("\nEnd of data insertion\n");
 	return;
 }	// fillQueues 
-
-void printQueues(QUEUE* q0to9, QUEUE* q10to19,
-	QUEUE* q20to29, QUEUE* qOver29)
-{
-	//	Statements 
-	printf("Data   0.. 9:");
-	printOneQueue(q0to9);
-
-	printf("Data  10..19:");
-	printOneQueue(q10to19);
-
-	printf("Data  20..29:");
-	printOneQueue(q20to29);
-
-	printf("Data over 29:");
-	printOneQueue(qOver29);
-
-	return;
-}	// printQueues 
 
 void printOneQueue(QUEUE* pQueue)
 {
@@ -238,7 +220,7 @@ void printOneQueue(QUEUE* pQueue)
 	lineCount = 0;
 	while (!emptyQueue(pQueue))
 	{
-		dequeue(pQueue, (void*)&dataPtr);
+		dequeue(pQueue, (void**)&dataPtr);
 		if (lineCount++ >= 10)
 		{
 			lineCount = 1;
